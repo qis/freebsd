@@ -1,0 +1,40 @@
+# Network
+Port 22
+AddressFamily inet
+ListenAddress 0.0.0.0
+
+# Version
+Protocol 2
+HostKey /etc/ssh/ssh_host_rsa_key
+UsePrivilegeSeparation sandbox
+UseDNS no
+
+# Logging
+SyslogFacility AUTH
+LogLevel INFO
+
+# Authentication
+LoginGraceTime 120
+PermitRootLogin prohibit-password
+PermitEmptyPasswords no
+StrictModes yes
+IgnoreRhosts yes
+PubkeyAuthentication yes
+PasswordAuthentication yes
+HostbasedAuthentication no
+ChallengeResponseAuthentication no
+#KerberosAuthentication no
+#GSSAPIAuthentication no
+UsePAM yes
+
+# Options
+X11Forwarding no
+PrintMotd no
+Banner none
+TCPKeepAlive yes
+
+# Environment
+AcceptEnv LANG LC_*
+
+# Subsystem
+Subsystem sftp /usr/libexec/sftp-server

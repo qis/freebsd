@@ -1,0 +1,26 @@
+[core]
+  autocrlf = false
+  safecrlf = false
+  filemode = false
+  whitespace = cr-at-eol
+  compression = 9
+
+[alias]
+  br = branch
+  co = checkout
+  st = status
+  cm = !git add --all && git commit -m
+
+[diff]
+  mnemonicprefix = true
+
+[push]
+  default = simple
+
+[color "diff"]
+  meta = yellow bold
+  frag = magenta
+
+[color "status"]
+  added = green
+  changed = yellow
