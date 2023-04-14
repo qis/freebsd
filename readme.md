@@ -84,6 +84,10 @@ curl ${backup}/etc/devfs.conf -o /etc/devfs.conf
 curl ${backup}/etc/sysctl.conf -o /etc/sysctl.conf
 curl ${backup}/etc/ntp.conf -o /etc/ntp.conf
 
+curl ${backup}/etc/mergemaster.rc -o /etc/mergemaster.rc
+curl ${backup}/etc/make.conf -o /etc/make.conf
+curl ${backup}/etc/src.conf -o /etc/src.conf
+
 curl ${backup}/home/qis/.cshrc -o /home/qis/.cshrc
 curl ${backup}/home/qis/.tmux.conf -o /home/qis/.tmux.conf
 curl ${backup}/home/qis/.gitconfig -o /home/qis/.gitconfig
@@ -118,6 +122,9 @@ sshd_enable="YES"
 ntpd_enable="YES"
 EOF
 
+# Edit CPUTYPE.
+vi /etc/make.conf
+
 reboot
 ```
 
@@ -135,18 +142,17 @@ Update `STABLE` and `CURRENT`.
 pkg install git
 
 # For FreeBSD STABLE.
-git clone https://git.freebsd.org/src.git --branch stable/`freebsd-version -k|cut -d. -f1` /usr/src
+git clone https://git.freebsd.org/src.git --branch stable/`freebsd-version -k | cut -d. -f1` /usr/src
 
 # For FreeBSD CURRENT.
 git clone https://git.freebsd.org/src.git /usr/src
 
 cd /usr/src
 make -j7 buildworld kernel KERNCONF=GENERIC-NODEBUG && reboot
+
+cd /usr/src
 make installworld
 ```
-
-
-
 
 Merge configuration files.
 
@@ -154,13 +160,15 @@ Merge configuration files.
 mergemaster -Ui
 make check-old       # yes | make delete-old
 make check-old-libs  # yes | make delete-old-libs
+make check-old-dirs  # yes | make delete-old-dirs
+reboot
 ```
 
 <!--
 Create system image.
 
 ```sh
-cd /usr/src && svn update
+cd /usr/src
 make -j7 buildworld buildkernel KERNCONF=GENERIC-NODEBUG \
   MAKE_CONF=/etc/make.conf SRC_CONF=/etc/src.conf
 cd release
@@ -214,7 +222,7 @@ ln -s /usr/local/bin/nvim /usr/local/bin/vim
 ## `sudo`
 Configure [sudo(1)](https://www.freebsd.org/cgi/man.cgi?query=sudo).
 
-`visudo`
+`EDITOR=vim visudo`
 
 ```sudo
 # FreeBSD pkg and fetch.
@@ -234,7 +242,7 @@ root	ALL=(ALL) ALL
 qis	ALL=(ALL) NOPASSWD: ALL
 
 # See sudoers(5) for more information on "#include" directives:
-#includedir /usr/local/etc/sudoers.d
+@includedir /usr/local/etc/sudoers.d
 ```
 
 ## Development
@@ -242,7 +250,7 @@ Install development packages or ports.
 
 ```sh
 # pkg install cmake git-lite nasm ninja
-# portmaster -D devel/{cmake,git-lite,nasm,ninja}
+# portmaster -D devel/{cmake,nasm,ninja}
 # portmaster --clean-distfiles
 ```
 
