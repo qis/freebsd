@@ -1,0 +1,49 @@
+[user]
+  name = Alexej Harm
+  email = alexej.h@xiphos.de
+
+[credential "https://github.com"]
+  username = qis
+
+[core]
+  eol = lf
+  autocrlf = false
+  filemode = false
+  whitespace = blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+  compression = 9
+  fscache = true
+
+[init]
+  defaultBranch = master
+
+[apply]
+  whitespace = fix
+
+[alias]
+  br = branch
+  co = checkout
+  st = status
+  cm = !git add --all && git commit -m
+  in = !git init && git config core.filemode false
+  ls = log --abbrev-commit --pretty=oneline
+
+[blame]
+  date = short
+  pretty = full
+
+[diff]
+  mnemonicprefix = true
+
+[pull]
+  rebase = false
+
+[push]
+  default = simple
+
+[color "diff"]
+  meta = yellow bold
+  frag = magenta
+
+[color "status"]
+  added = green
+  changed = yellow

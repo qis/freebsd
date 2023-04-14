@@ -1,16 +1,15 @@
 # FreeBSD
-Installation template for FreeBSD `RELEASE`, `STABLE` and `CURRENT`.
+Installation template for FreeBSD `STABLE`.
 
 <!--
 **Distribution Select**
 
 ```
 [ ] base-dbg
-[ ] doc
 [ ] kernel-dbg
 [ ] lib32-dbg
 [ ] lib32
-[ ] src
+[*] src
 [ ] tests
 ```
 
@@ -21,7 +20,7 @@ Installation template for FreeBSD `RELEASE`, `STABLE` and `CURRENT`.
 [*] sshd
 [ ] moused
 [*] ntpd
-[ ] powerd
+[*] powerd
 [ ] dumpdev
 ```
 
@@ -39,6 +38,16 @@ Installation template for FreeBSD `RELEASE`, `STABLE` and `CURRENT`.
 [*] 8 disable_sendmail
 [*] 9 secure_console
 ```
+
+**Manual Configuration**
+
+```sh
+zfs create zroot/usr/obj
+zfs rename zroot/usr/home zroot/home
+zfs set mountpoint=/home zroot/home
+rm -f /home
+exit
+```
 -->
 
 ## System Setup
@@ -49,17 +58,23 @@ printf "fdesc\t\t/dev/fd\t\tfdescfs\trw\t0\t0\n" >> /etc/fstab
 printf "proc\t\t/proc\t\tprocfs\trw\t0\t0\n" >> /etc/fstab
 ssh-keygen -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key
 chmod 600 /etc/ssh/ssh_host_rsa_key
+pkg install curl git
+
+set backup=https://raw.githubusercontent.com/qis/freebsd/master
+curl -L ${backup}/root/.cshrc -O /root/.cshrc
+curl -L ${backup}/root/.tmux.conf -O /root/.tmux.conf
 ```
 
-`vi /etc/rc.conf`
-
 ```sh
+tee /etc/rc.conf >/dev/null <<'EOF'
 # System
 dumpdev="NO"
 keyrate="fast"
 syslogd_flags="-ssC"
 clear_tmp_enable="YES"
 hostname="build.xiphos.de"
+powerd_enable="YES"
+zfs_enable="YES"
 
 # Sendmail
 sendmail_enable="NONE"
@@ -68,33 +83,32 @@ sendmail_outbound_enable="NO"
 sendmail_msp_queue_enable="NO"
 
 # Network
-ifconfig_hn0="inet 10.0.0.11 netmask 255.255.255.0"
-defaultrouter="10.0.0.1"
+ifconfig_hn0="DHCP"
+#ifconfig_hn0="inet 10.0.0.11 netmask 255.255.255.0"
+#defaultrouter="10.0.0.1"
 
 # Services
 sshd_enable="YES"
 ntpd_enable="YES"
+EOF
 ```
 
 ## System Backup
 Create backup.
 
 ```sh
-tar cvzf /home/user/root.tar.gz /boot/loader.conf \
+tar cvzf /home/qis/root.tar.gz /boot/loader.conf \
   /etc/{ssh/sshd_config,devfs.conf,make.conf,mergemaster.rc,ntp.conf,src.conf,sysctl.conf} \
-  /home/user/{.config/nvim,.cshrc,.gitconfig,.tmux.conf,.ssh/authorized_keys,.ssh/config} \
+  /home/qis/{.config/nvim,.cshrc,.gitconfig,.tmux.conf,.ssh/authorized_keys,.ssh/config} \
   /root/{.config/nvim,.cshrc,.tmux.conf,.ssh/authorized_keys,.ssh/config}
 ```
 
 Restore backup.
 
 ```sh
-rm -f /home
-mv /usr/home /
-tar xvf /home/user/root.tar.gz -C /
-rm -f /home/user/{.login,.login_conf,.mail_aliases,.mailrc,.profile,.rhosts,.shrc,root.tar.gz}
+tar xvf /home/qis/root.tar.gz -C /
+rm -f /home/qis/{.login,.login_conf,.mail_aliases,.mailrc,.profile,.rhosts,.shrc}
 rm -f /root/{.k5login,.login,.profile}
-ln -s /usr/bin/svnlite /usr/bin/svn
 reboot
 ```
 
@@ -207,7 +221,7 @@ Defaults env_keep += "EDITOR PAGER CLICOLOR LSCOLORS TMUX"
 
 # User privilege specification.
 root	ALL=(ALL) ALL
-user	ALL=(ALL) NOPASSWD: ALL
+qis	ALL=(ALL) NOPASSWD: ALL
 
 # See sudoers(5) for more information on "#include" directives:
 #includedir /usr/local/etc/sudoers.d
