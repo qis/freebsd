@@ -1,1 +1,1 @@
-IGNORE_FILES='/boot/loader.conf /etc/devfs.conf /etc/fstab /etc/motd /etc/ntp.conf /etc/pkg/FreeBSD.conf /etc/rc.conf /etc/resolv.conf /etc/ssh/sshd_config /etc/sysctl.conf /etc/syslog.conf /root/.cshrc /root/.k5login /root/.login /root/.profile'
+IGNORE_FILES='/boot/loader.conf /etc/devfs.conf /etc/fstab /etc/ntp.conf /etc/rc.conf /etc/resolv.conf /etc/ssh/sshd_config /etc/sysctl.conf /root/.cshrc /root/.k5login /root/.login /root/.profile'

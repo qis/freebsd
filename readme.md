@@ -1,30 +1,41 @@
 # FreeBSD
-Installation template for FreeBSD `STABLE`.
+Installation template for FreeBSD 13.
 
 <!--
-**Distribution Select**
+## Distribution Select
 
 ```
 [ ] base-dbg
 [ ] kernel-dbg
 [ ] lib32-dbg
 [ ] lib32
-[*] src
+[ ] ports
+[ ] src
 [ ] tests
 ```
 
-**System Configuration**
+## Partitioning
+
+```
+Auto (ZFS)
+Pool Type/Disks: stripe: 1 disks
+Partition Scheme: GPT (UEFI)
+>>> Install
+```
+
+## System Configuration
 
 ```
 [ ] local_unbound
 [*] sshd
 [ ] moused
+[ ] ntpdate
 [*] ntpd
 [*] powerd
 [ ] dumpdev
 ```
 
-**System Hardening**
+## System Hardening
 
 ```
 [*] 0 hide_uids
@@ -37,6 +48,7 @@ Installation template for FreeBSD `STABLE`.
 [*] 7 disable_syslogd
 [*] 8 disable_sendmail
 [*] 9 secure_console
+[ ] 10 disable_ddtrace
 ```
 
 **Manual Configuration**
@@ -54,27 +66,33 @@ exit
 Configure system.
 
 ```sh
-printf "fdesc\t\t/dev/fd\t\tfdescfs\trw\t0\t0\n" >> /etc/fstab
-printf "proc\t\t/proc\t\tprocfs\trw\t0\t0\n" >> /etc/fstab
-ssh-keygen -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key
-chmod 600 /etc/ssh/ssh_host_rsa_key
-pkg install curl git wget
+printf "fdesc\t\t\t/dev/fd\t\tfdescfs\trw\t\t0\t0\n" >> /etc/fstab
+printf "proc\t\t\t/proc\t\tprocfs\trw\t\t0\t0\n" >> /etc/fstab
+
+pkg install curl
 
 set backup=https://raw.githubusercontent.com/qis/freebsd/master
+
 curl ${backup}/root/.cshrc -o /root/.cshrc
 curl ${backup}/root/.tmux.conf -o /root/.tmux.conf
+curl ${backup}/root/.gitconfig -o /root/.gitconfig
+
 curl ${backup}/boot/loader.conf -o /boot/loader.conf
+
 curl ${backup}/etc/ssh/sshd_config -o /etc/ssh/sshd_config
 curl ${backup}/etc/devfs.conf -o /etc/devfs.conf
 curl ${backup}/etc/sysctl.conf -o /etc/sysctl.conf
 curl ${backup}/etc/ntp.conf -o /etc/ntp.conf
 
-service sshd restart
-service ntpd restart
-```
+curl ${backup}/home/qis/.cshrc -o /home/qis/.cshrc
+curl ${backup}/home/qis/.tmux.conf -o /home/qis/.tmux.conf
+curl ${backup}/home/qis/.gitconfig -o /home/qis/.gitconfig
 
-```sh
-tee /etc/rc.conf >/dev/null <<'EOF'
+chown qis:qis /home/qis/{.cshrc,.tmux.conf,.gitconfig}
+rm -f /home/qis/{.login,.login_conf,.mail_aliases,.mailrc,.profile,.rhosts,.shrc}
+rm -f /root/{.k5login,.login,.profile}
+
+tee /etc/rc.conf >/dev/null <<EOF
 # System
 dumpdev="NO"
 keyrate="fast"
@@ -99,24 +117,7 @@ ifconfig_hn0="DHCP"
 sshd_enable="YES"
 ntpd_enable="YES"
 EOF
-```
 
-## System Backup
-Create backup.
-
-```sh
-tar cvzf /home/qis/root.tar.gz /boot/loader.conf \
-  /etc/{ssh/sshd_config,devfs.conf,make.conf,mergemaster.rc,ntp.conf,src.conf,sysctl.conf} \
-  /home/qis/{.config/nvim,.cshrc,.gitconfig,.tmux.conf,.ssh/authorized_keys,.ssh/config} \
-  /root/{.config/nvim,.cshrc,.tmux.conf,.ssh/authorized_keys,.ssh/config}
-```
-
-Restore backup.
-
-```sh
-tar xvf /home/qis/root.tar.gz -C /
-rm -f /home/qis/{.login,.login_conf,.mail_aliases,.mailrc,.profile,.rhosts,.shrc}
-rm -f /root/{.k5login,.login,.profile}
 reboot
 ```
 
@@ -128,23 +129,24 @@ freebsd-update fetch
 freebsd-update install
 ```
 
-Update `STABLE`.
+Update `STABLE` and `CURRENT`.
 
 ```sh
-# svn checkout https://svn.freebsd.org/base/stable/11 /usr/src
-cd /usr/src && svn update
-make -j7 buildworld kernel KERNCONF=GENERIC && reboot
-make installworld
-```
+pkg install git
 
-Update `CURRENT`.
+# For FreeBSD STABLE.
+git clone https://git.freebsd.org/src.git --branch stable/`freebsd-version -k|cut -d. -f1` /usr/src
 
-```sh
-# svn checkout https://svn.freebsd.org/base/head /usr/src
-cd /usr/src && svn update
+# For FreeBSD CURRENT.
+git clone https://git.freebsd.org/src.git /usr/src
+
+cd /usr/src
 make -j7 buildworld kernel KERNCONF=GENERIC-NODEBUG && reboot
 make installworld
 ```
+
+
+
 
 Merge configuration files.
 
