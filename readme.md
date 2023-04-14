@@ -61,9 +61,16 @@ chmod 600 /etc/ssh/ssh_host_rsa_key
 pkg install curl git wget
 
 set backup=https://raw.githubusercontent.com/qis/freebsd/master
-wget ${backup}/root/.cshrc -O /root/.cshrc
-wget ${backup}/root/.tmux.conf -O /root/.tmux.conf
-wget ${backup}/boot/loader.conf -O /boot/loader.conf
+curl ${backup}/root/.cshrc -o /root/.cshrc
+curl ${backup}/root/.tmux.conf -o /root/.tmux.conf
+curl ${backup}/boot/loader.conf -o /boot/loader.conf
+curl ${backup}/etc/ssh/sshd_config -o /etc/ssh/sshd_config
+curl ${backup}/etc/devfs.conf -o /etc/devfs.conf
+curl ${backup}/etc/sysctl.conf -o /etc/sysctl.conf
+curl ${backup}/etc/ntp.conf -o /etc/ntp.conf
+
+service sshd restart
+service ntpd restart
 ```
 
 ```sh
