@@ -58,11 +58,12 @@ printf "fdesc\t\t/dev/fd\t\tfdescfs\trw\t0\t0\n" >> /etc/fstab
 printf "proc\t\t/proc\t\tprocfs\trw\t0\t0\n" >> /etc/fstab
 ssh-keygen -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key
 chmod 600 /etc/ssh/ssh_host_rsa_key
-pkg install curl git
+pkg install curl git wget
 
 set backup=https://raw.githubusercontent.com/qis/freebsd/master
-curl -L ${backup}/root/.cshrc -O /root/.cshrc
-curl -L ${backup}/root/.tmux.conf -O /root/.tmux.conf
+wget ${backup}/root/.cshrc -O /root/.cshrc
+wget ${backup}/root/.tmux.conf -O /root/.tmux.conf
+wget ${backup}/boot/loader.conf -O /boot/loader.conf
 ```
 
 ```sh
